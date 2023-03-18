@@ -12,6 +12,14 @@ import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
 import io.pleo.antaeus.core.services.BillingService
 
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.util.concurrent.Executors
+import okhttp3.OkHttpClient
+import okhttp3.Request
+
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -26,6 +34,24 @@ class AntaeusRest(
 
     override fun run() {
         app.start(7000)
+
+        // Schedule task to run on the first of every month
+        val scheduler = Executors.newScheduledThreadPool(1)
+        val task = Runnable {
+            val now = LocalDate.now(ZoneId.of("UTC"))
+            if (now.dayOfMonth == 1) {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                        .url("http://localhost:7000/rest/v1/monthlyPayments")
+                        .build()
+                val response = client.newCall(request).execute()
+            }
+        }
+        val firstOfMonth = LocalDate.now(ZoneId.of("UTC")).withDayOfMonth(1)
+        val delay = Duration.between(LocalTime.now(), LocalTime.MIDNIGHT).plusDays(firstOfMonth.dayOfMonth.toLong() - 1)
+        val period = Duration.ofDays(31)
+
+        scheduler.scheduleAtFixedRate(task, delay.toMinutes(), period.toMinutes(), java.util.concurrent.TimeUnit.MINUTES)
     }
 
     // Set up Javalin rest app
@@ -85,7 +111,7 @@ class AntaeusRest(
                     path("monthlyPayments") {
                         // URL: /rest/v1/monthlyPayments
                         get {
-                            it.json(billingService.monthlyPaymentsExecution(invoiceService.fetchAll()))
+                            it.json(billingService.monthlyPaymentsExecution(invoiceService.fetchAll()))                 
                         }
                     }
                 }
