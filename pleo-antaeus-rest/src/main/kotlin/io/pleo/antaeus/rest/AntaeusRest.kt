@@ -39,12 +39,8 @@ class AntaeusRest(
         val scheduler = Executors.newScheduledThreadPool(1)
         val task = Runnable {
             val now = LocalDate.now(ZoneId.of("UTC"))
-            if (now.dayOfMonth == 1) {
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                        .url("http://localhost:7000/rest/v1/monthlyPayments")
-                        .build()
-                val response = client.newCall(request).execute()
+            if (now.dayOfMonth == 20) {
+                billingService.monthlyPaymentsExecution()
             }
         }
         val firstOfMonth = LocalDate.now(ZoneId.of("UTC")).withDayOfMonth(1)
@@ -106,12 +102,6 @@ class AntaeusRest(
                         // URL: /rest/v1/customers/{:id}
                         get(":id") {
                             it.json(customerService.fetch(it.pathParam("id").toInt()))
-                        }
-                    }
-                    path("monthlyPayments") {
-                        // URL: /rest/v1/monthlyPayments
-                        get {
-                            it.json(billingService.monthlyPaymentsExecution(invoiceService.fetchAll()))                 
                         }
                     }
                 }
