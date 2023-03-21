@@ -15,35 +15,32 @@ class BillingService(
 
 ) {
 
-    fun monthlyPaymentsExecution(): List<String> {
+    fun monthlyPaymentsExecution(){
 
         val invoices: List<Invoice> = invoiceService.fetchInvoicesByStatus(InvoiceStatus.PENDING)
-        val listInvoices: ArrayList<String> = ArrayList()
 
         invoices.forEach{ invoice -> 
             try{
                 if(paymentProvider.charge(invoice)){
                     // Since the invoice was sucessfully paid we update its value in the database
                     invoiceService.updateInvoiceStatus(invoice.id, InvoiceStatus.PAID)
-                    listInvoices.add("Invoice with id: " + invoice.id + " was successfully paid.")
+                    println("Invoice with id: " + invoice.id + " was successfully paid.")
                 }
                 else{
                     // Let's keep the status of the invoice as PENDING since the customer
                     // didn't have enough funds to do the payment
-                    listInvoices.add("Invoice with id: " + invoice.id + " was not paid due to lack of funds.")
+                    println("Invoice with id: " + invoice.id + " was not paid due to lack of funds.")
                 }
             }
             catch(e: CustomerNotFoundException) {
-                println("Payment failed because there isn't a customer with a matching id: " + invoice.customerId)
+                println(e.message)
             }
             catch(e: CurrencyMismatchException) {
-                println("Payment failed because the currency in the invoice: " + invoice.amount.currency + 
-                " does not match the customer's.")
+                println(e.message)
             }
             catch(e: NetworkException) {
-                println("Payment failed because of a network error: ${e.message}")
+                println(e.message)
             }
         }
-        return listInvoices
     }
 }

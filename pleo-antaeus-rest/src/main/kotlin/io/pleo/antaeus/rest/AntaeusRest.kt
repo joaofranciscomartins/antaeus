@@ -17,8 +17,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.concurrent.Executors
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 import mu.KotlinLogging
 
@@ -39,7 +37,7 @@ class AntaeusRest(
         val scheduler = Executors.newScheduledThreadPool(1)
         val task = Runnable {
             val now = LocalDate.now(ZoneId.of("UTC"))
-            if (now.dayOfMonth == 20) {
+            if (now.dayOfMonth == 1) {
                 billingService.monthlyPaymentsExecution()
             }
         }

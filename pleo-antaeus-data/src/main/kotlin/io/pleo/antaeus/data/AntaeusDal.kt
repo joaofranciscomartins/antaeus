@@ -83,7 +83,7 @@ class AntaeusDal(private val db: Database) {
     }
 
     fun updateInvoiceStatus(invoiceId: Int, status: InvoiceStatus){
-        val id = transaction(db) {
+        transaction(db) {
             // Insert the invoice id and update its status.
             InvoiceTable.update({ InvoiceTable.id eq invoiceId }) {
                 it[this.status] = status.toString()

@@ -1,12 +1,14 @@
-> :warning: This repository was archived automatically since no ownership was defined :warning:
->
-> For details on how to claim stewardship of this repository see:
->
-> [How to configure a service in OpsLevel](https://www.notion.so/pleo/How-to-configure-a-service-in-OpsLevel-f6483fcb4fdd4dcc9fc32b7dfe14c262)
->
-> To learn more about the automatic process for stewardship which archived this repository see:
->
-> [Automatic process for stewardship](https://www.notion.so/pleo/Automatic-process-for-stewardship-43d9def9bc9a4010aba27144ef31e0f2)
+## My Approach
+
+The 'monthlyPaymentsExecution' method of BillingService is responsible for calling the external PaymentsProvider over every invoice with status 'Pending', meaning that the invoice is up for payment.
+
+It was created a method in the Invoice Service that allows us to get only the invoices from the database which are not paid yet. Those invoices are then sent to the external payments provider. If the payment was successfull, meaning that the customer had enough funds and no exception occurred in the process, the invoiced is marked as status PAID in the database via InvoiceService. This means that in the next month this invoice won't be up for payment again.
+
+Finally in the Antaeus web service a scheduler was created. This scheduler is responsible for scheduling a task which calls the 'monthlyPaymentsExecution' method every first day of every month.
+
+There were also tests created to ensure several use cases: when there are no invoices, when the payments provider is able to perform the payment, since the customer had enough funds, and when there are not enough funds in the customer's account.
+
+This challenge took me about 4-5h to complete.
 
 ## Antaeus
 
